@@ -9,7 +9,6 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/extract", extractRoute);   // POST file + question
 app.use("/api/notify", notifyRoute);     // POST extractedJson + text + question + email

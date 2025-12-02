@@ -1,46 +1,74 @@
 import express from "express";
-import axios from "axios";
+import { triggerN8N } from "../services/n8nservice.js";
 
 const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { text, question, extractedJson } = req.body;
-
-    // Email now comes from extractedJson.email
-    const email = extractedJson?.email;
+    const {
+      email,
+      subject = "",
+      body = "",        
+      summary = "",
+      answer = "",
+      structured = {},
+      question = "",
+      metadata = {}
+    } = req.body || {};
 
     if (!email) {
-      return res.status(400).json({ error: "Recipient email is required" });
+      return res.status(400).json({
+        success: false,
+        message: "Missing required field: email"
+      });
     }
 
-    // Final payload to n8n
+    let structuredArray = [];
+
+    if (Array.isArray(structured)) {
+      structuredArray = structured;
+    } else if (typeof structured === "object" && structured !== null) {
+      structuredArray = Object.entries(structured).map(([key, value]) => ({
+        field: key,
+        value
+      }));
+    }
+
+    if (structuredArray.length === 0) {
+      structuredArray.push({
+        field: "Info",
+        value: "No structured data returned by AI"
+      });
+    }
+
     const payload = {
-      text,
+      email,
+      subject,
+      body,
+      summary,
+      answer,
+      structured: structuredArray,
       question,
-      extractedJson,
-      email, // flatten email for easier access in n8n
+      metadata,
+      sentAt: new Date().toISOString(),
     };
 
-    const n8nWebhook = process.env.N8N_WEBHOOK_URL;
+    console.log("FINAL PAYLOAD TO N8N →\n", JSON.stringify(payload, null, 2));
 
-    if (!n8nWebhook) {
-      return res
-        .status(500)
-        .json({ error: "N8N_WEBHOOK_URL is not defined in .env" });
-    }
+    const n8nResponse = await triggerN8N(payload);
 
-    const response = await axios.post(n8nWebhook, payload);
-
-    res.json({
+    return res.json({
       success: true,
-      n8nResponse: response.data,
+      message: "Forwarded to n8n webhook successfully",
+      n8nResponse: n8nResponse || {}
     });
-  } catch (error) {
-    console.error("Notify Error:", error);
-    res.status(500).json({
-      error: "Failed to send to n8n",
-      details: error.message,
+
+  } catch (err) {
+    console.error("notify.js error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to forward to n8n webhook",
+      error: err.message
     });
   }
 });
