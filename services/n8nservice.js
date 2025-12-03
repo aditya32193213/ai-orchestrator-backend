@@ -2,10 +2,10 @@ import axios from "axios";
 
 export async function triggerN8N(payload) {
     if (!process.env.N8N_WEBHOOK_URL) {
-        throw new Error("❌ N8N_WEBHOOK_URL missing in .env");
+        throw new Error("N8N_WEBHOOK_URL missing in .env");
     }
 
-    console.log("📩 Sending payload to n8n:", payload);
+    console.log("Sending payload to n8n:", payload);
 
     try {
         const response = await axios.post(
@@ -17,11 +17,11 @@ export async function triggerN8N(payload) {
             }
         );
 
-        console.log("✅ n8n Response:", response.data);
+        console.log("n8n Response:", response.data);
         return response.data;
 
     } catch (error) {
-        console.error("❌ Error sending to n8n:", error.message);
+        console.error("Error sending to n8n:", error.message);
 
         return {
             success: false,

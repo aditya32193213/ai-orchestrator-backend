@@ -15,7 +15,7 @@ app.use("/api/notify", notifyRoute);     // POST extractedJson + text + question
 
 app.get("/", (req, res) => res.json({ ok: true, service: "AI Orchestrator Backend" }));
 
-const PORT = process.env.PORT||5000;
+const PORT = process.env.PORT||10000;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });

@@ -61,16 +61,16 @@ ${question}
   try {
     parsed = JSON.parse(rawText);
 
-    // 🔧 Ensure structured is ALWAYS a valid array
+   
     if (!Array.isArray(parsed.structured) || parsed.structured.length === 0) {
-      console.log("⚠️ Gemini returned empty or invalid structured data. Fixing it.");
+      console.log(" Gemini returned empty or invalid structured data. Fixing it.");
 
       parsed.structured = [
         { field: "Status", value: "AI returned incomplete structured data" }
       ];
     }
   } catch (err) {
-    console.log("❌ JSON Parse Failed — Returning fallback");
+    console.log("JSON Parse Failed — Returning fallback");
 
     parsed = {
       summary: "Unable to generate full structured output.",
